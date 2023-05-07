@@ -1,7 +1,9 @@
+extern crate rgrep;
+
 use std::env;
-use std::fs::File;
-use std::io::prelude::*;
 use std::process;
+
+use rgrep::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -15,31 +17,9 @@ fn main() {
         process::exit(1);
     });
 
-    let mut f = File::open(config.filename).expect("file not found"); // panic if file not found with custom message
+    if let Err(e) = rgrep::run(config) {
+        println!("Application error: {}", e);
 
-    let mut contents = String::new();
-    f.read_to_string(&mut contents)
-        .expect("something went wrong reading the file"); // panic if file can't read for whatever reasons, with custom message
-
-    print!("With text:\n{}", contents);
-}
-
-struct Config {
-    // use a struct instead of tuple to make return structure meaningful from parse_config ()
-    query: String,
-    filename: String,
-}
-
-impl Config {
-    // Constructor for Config
-    fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments. Usage> cargo run <query string> <filename>");
-        }
-        // Using clone() to avoid ownership issue here; a small performance price to pay to make program more readable (for now)
-        let query = args[1].clone();
-        let filename = args[2].clone();
-
-        Ok(Config { query, filename })
+        process::exit(1);
     }
 }
