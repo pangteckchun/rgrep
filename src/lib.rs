@@ -30,7 +30,43 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut contents = String::new();
     f.read_to_string(&mut contents)?;
 
-    print!("With text:\n{}\n", contents);
+    // print!("With text:\n{}\n\n", contents);
+
+    for line in search(&config.query, &contents) {
+        println!("Found: {}", line);
+    }
 
     Ok(())
+}
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut results = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+Safe, fast, productive.
+Pick three.";
+        // Strings cannot be indented, else the assert will fail
+
+        println!("Contents prep: {}", contents); // passed tests does not println!() !!! Failed one does!
+
+        assert_eq!(vec!["Safe, fast, productive."], search(query, contents));
+    }
 }
